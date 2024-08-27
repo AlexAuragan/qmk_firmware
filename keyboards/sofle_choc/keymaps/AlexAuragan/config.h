@@ -26,4 +26,4 @@
 #define RGB_MATRIX_SLEEP     // turn off effects when suspended
 #define RGB_MATRIX_MAXIMUM_BRIGHTNESS 100  // limits maximum brightness of LEDs (max 255). Higher may cause the controller to crash
 #define SPLIT_LAYER_STATE_ENABLE
-
+#define TAPPING_TOGGLE 1
