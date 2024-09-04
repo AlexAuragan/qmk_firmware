@@ -15,7 +15,67 @@
  */
 #include QMK_KEYBOARD_H
 #include "keymap_french.h"
-#include "utils/tap_hold.c"
+
+enum {
+    TD_LOCK,
+    TD_COLN,
+    TD_COMM,
+    TD_DOT,
+    TD_MEDIA
+};
+
+typedef struct {
+    uint16_t tap;
+    uint16_t hold;
+    uint16_t held;
+} tap_dance_tap_hold_t;
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    tap_dance_action_t *action;
+
+    switch (keycode) {
+        case TD(TD_COLN):
+        case TD(TD_COMM):
+        case TD(TD_DOT):
+            action = &tap_dance_actions[QK_TAP_DANCE_GET_INDEX(keycode)];
+            if (!record->event.pressed && action->state.count && !action->state.finished) {
+                tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
+                tap_code16(tap_hold->tap);
+            }
+            break;  // Add break statement to avoid fall-through.
+    }
+    return true;
+}
+
+void tap_dance_tap_hold_finished(tap_dance_state_t *state, void *user_data) {
+    tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)user_data;
+
+    if (state->pressed) {
+        if (state->count == 1
+#ifndef PERMISSIVE_HOLD
+            && !state->interrupted
+#endif
+        ) {
+            register_code16(tap_hold->hold);
+            tap_hold->held = tap_hold->hold;
+        } else {
+            register_code16(tap_hold->tap);
+            tap_hold->held = tap_hold->tap;
+        }
+    }
+}
+
+void tap_dance_tap_hold_reset(tap_dance_state_t *state, void *user_data) {
+    tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)user_data;
+
+    if (tap_hold->held) {
+        unregister_code16(tap_hold->held);
+        tap_hold->held = 0;
+    }
+}
+
+#define ACTION_TAP_HOLD(tap, hold) \
+    { .fn = {NULL, tap_dance_tap_hold_finished, tap_dance_tap_hold_reset}, .user_data = (void *)&((tap_dance_tap_hold_t){tap, hold, 0}), }
 
 tap_dance_action_t tap_dance_actions[] = {
     // Tap once for Escape, twice for Caps Lock
@@ -59,14 +119,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_ESC,   FR_1,   FR_2,    FR_3,    FR_4,    FR_5,                       FR_6,     FR_7,    FR_8,    FR_9,    FR_0,    KC_DEL,
     KC_TAB,   FR_Q,   FR_W,    FR_F,    FR_P,    FR_B,                       FR_J,     FR_L,    FR_O,    FR_Y,    TD(TD_COLN), FR_EQL,
     KC_LSFT,  MT(MOD_LCTL, FR_A),   MT(MOD_LALT, KC_R),MT(MOD_RALT, KC_S),MT(MOD_LSFT, KC_T),KC_G,                       FR_M,    MT(MOD_RSFT, KC_N),MT(MOD_RALT, KC_E),MT(MOD_LALT, KC_I),    MT(MOD_RCTL, FR_U), KC_QUOT,
-    FR_DLR,   FR_Z,   FR_X,    FR_C,    FR_V,    FR_D,    KC_BTN1,           KC_BTN2,  FR_K,    FR_H,    TD(TD_COMM), TD(TD_DOT),  FR_EXLM, KC_CAPS,
-                KC_LEFT, KC_RIGHT, KC_BSPC, KC_SPC, TD(TD_LOCK),                    TT(1),    KC_ENT,   TT(2),  KC_UP, KC_DOWN
+    KC_LCTL,   FR_Z,   FR_X,    FR_C,    FR_V,    FR_D,    KC_BTN1,           KC_BTN2,  FR_K,    FR_H,    TD(TD_COMM), TD(TD_DOT),  FR_EXLM, KC_CAPS,
+                KC_LEFT, KC_RIGHT, TD(TD_LOCK),  KC_SPC,  KC_BSPC,                    TT(1),    KC_ENT,   TT(2),  KC_UP, KC_DOWN
     ),
 
 [1] = LAYOUT(
        QK_LOCK,   KC_F1, KC_F2,   KC_F3,   KC_F4,   KC_F5,                           KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,
-       FR_SUP2, FR_AMPR, FR_EACU, FR_DQUO, FR_QUOT, DM_REC1,                         FR_MINS, FR_EGRV, FR_UNDS, FR_CCED, FR_AGRV, KC_F12,
-       FR_SLSH, FR_BSLS, FR_TILD, FR_CIRC, FR_HASH, DM_PLY1,                         FR_AT,   FR_ASTR, FR_GRV,  FR_DIAE, KC_UP,   FR_UGRV,
+       FR_SUP2, FR_AMPR, FR_EACU, FR_DQUO, FR_QUOT, FR_DLR,                          FR_MINS, FR_EGRV, FR_UNDS, FR_CCED, FR_AGRV, KC_F12,
+       FR_SLSH, FR_BSLS, FR_TILD, FR_CIRC, FR_HASH, FR_PLUS,                         FR_AT,   FR_ASTR, FR_GRV,  FR_DIAE, KC_UP,   FR_UGRV,
        FR_LCBR, FR_RCBR, FR_LBRC, FR_RBRC, FR_LPRN, FR_RPRN, TG(3),      XXXXXXX,    FR_PERC, FR_PLUS, FR_PIPE, KC_LEFT, KC_DOWN, KC_RIGHT,
             _______, _______, _______, _______, _______,                                  _______, _______, _______, _______, _______
     ),
