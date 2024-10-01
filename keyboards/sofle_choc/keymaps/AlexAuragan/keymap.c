@@ -15,6 +15,7 @@
  */
 #include QMK_KEYBOARD_H
 #include "keymap_french.h"
+#include "rgblight.h"
 
 enum {
     TD_LOCK,
@@ -175,32 +176,48 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 
 
 //layer lighting
-bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
-    HSV hsv = {0, 255, 255};
-    switch(get_highest_layer(layer_state|default_layer_state)) {
-        case 3:
-            hsv = (HSV){180, 255, 255};
-            break;
-        case 2:
-            hsv = (HSV){130, 255, 255};
-            break;
-        case 1:
-            hsv = (HSV){30, 255, 255};
-            break;
-        default:
-            hsv = (HSV){200, 255, 255};
-            break;
-    }
+const rgblight_segment_t PROGMEM layer0_colors[] = RGBLIGHT_LAYER_SEGMENTS(
+    {0, RGBLED_NUM, HSV_BLUE}
+);
+const rgblight_segment_t PROGMEM layer1_colors[] = RGBLIGHT_LAYER_SEGMENTS(
+    {0, RGBLED_NUM, HSV_ORANGE}
+);
+const rgblight_segment_t PROGMEM layer2_colors[] = RGBLIGHT_LAYER_SEGMENTS(
+    {0, RGBLED_NUM, HSV_GREEN}
+);
+const rgblight_segment_t PROGMEM layer3_colors[] = RGBLIGHT_LAYER_SEGMENTS(
+    {0, RGBLED_NUM, HSV_CYAN}
+);
 
-    if (hsv.v > rgb_matrix_get_val()) {
-        hsv.v = rgb_matrix_get_val();
-    }
-    RGB rgb = hsv_to_rgb(hsv);
+// Define an array of layers to use with rgblight
+const rgblight_segment_t* const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS_LIST(
+    layer0_colors,
+    layer1_colors,
+    layer2_colors,
+    layer3_colors
+);
 
-    for (uint8_t i = led_min; i < led_max; i++) {
-        rgb_matrix_set_color(i, rgb.r, rgb.g, rgb.b);
-    }
-    return false;
+void keyboard_post_init_user(void) {
+    // Enable the LED layers
+    rgblight_layers = my_rgb_layers;
 }
 
+layer_state_t layer_state_set_user(layer_state_t state) {
+    // Both layers will light up if both kb layers are active
+    rgblight_set_layer_state(0, layer_state_cmp(state, 0));
+    rgblight_set_layer_state(1, layer_state_cmp(state, 1));
+    rgblight_set_layer_state(2, layer_state_cmp(state, 2));
+    rgblight_set_layer_state(3, layer_state_cmp(state, 3));
+    return state;
+}
 
+const uint16_t PROGMEM pt_combo[] = {KC_P, MT(MOD_LSFT, KC_T), COMBO_END};
+const uint16_t PROGMEM ft_combo[] = {KC_F, MT(MOD_LSFT, KC_T), COMBO_END};
+const uint16_t PROGMEM sp_combo[] = {KC_P, MT(MOD_RALT, KC_S), COMBO_END};
+const uint16_t PROGMEM arst_combo[] = {MT(MOD_LCTL, FR_A), MT(MOD_LALT, KC_R), MT(MOD_RALT, KC_S), MT(MOD_LSFT, KC_T), COMBO_END};
+combo_t key_combos[] = {
+    COMBO(pt_combo, KC_ENT),
+    COMBO(ft_combo, KC_DEL),
+    COMBO(sp_combo, KC_BSPC),
+    COMBO(arst_combo, KC_SPC)
+};

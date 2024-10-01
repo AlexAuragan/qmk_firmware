@@ -23,9 +23,18 @@
 //
 // I've found this helps with some ProMicros where the slave does not boot
 #define SPLIT_USB_DETECT
-#define RGB_MATRIX_SLEEP     // turn off effects when suspended
-#define RGB_MATRIX_MAXIMUM_BRIGHTNESS 100  // limits maximum brightness of LEDs (max 255). Higher may cause the controller to crash
 #define SPLIT_LAYER_STATE_ENABLE
 #define TAPPING_TOGGLE 1
 
+#define RGBLIGHT_SPLIT
+#define RGBLED_NUM 58 // 2 * 29 LEDs
+#define RGBLED_SPLIT { 29, 29 } // Number of LEDs on each half
+#define RGBLIGHT_LAYERS
+#define RGBLIGHT_LAYERS_OVERRIDE_RGB_OFF
+#define RGBLIGHT_EFFECT_BREATHING
+#define RGBLIGHT_EFFECT_RAINBOW_MOOD
+#define RGBLIGHT_EFFECT_RAINBOW_SWIRL
+#define RGBLIGHT_LIMIT_VAL 120 // Limit brightness to prevent power issues
 
+#define COMBO_ONLY_FROM_LAYER 0
+#define COMBO_TERM 50
