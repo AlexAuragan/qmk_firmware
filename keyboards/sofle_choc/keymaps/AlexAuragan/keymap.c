@@ -80,7 +80,7 @@ void tap_dance_tap_hold_reset(tap_dance_state_t *state, void *user_data) {
 
 tap_dance_action_t tap_dance_actions[] = {
     // Tap once for Escape, twice for Caps Lock
-    [TD_LOCK] = ACTION_TAP_DANCE_DOUBLE(KC_LCMD, LCA(FR_L)), /* windows key or ctrl+alt+L */
+    // [TD_LOCK] = ACTION_TAP_DANCE_DOUBLE(KC_LCMD, LCA(FR_L)), /* windows key or ctrl+alt+L */
     [TD_COLN] = ACTION_TAP_HOLD(FR_COLN, FR_SCLN), /* : or ;*/
     [TD_COMM] = ACTION_TAP_HOLD(FR_COMM, FR_LABK), /* , or < */
     [TD_DOT] = ACTION_TAP_HOLD(FR_DOT, FR_RABK), /* . or > */
@@ -121,7 +121,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TAB,   FR_Q,   FR_W,    FR_F,    FR_P,    FR_B,                       FR_J,     FR_L,    FR_O,    FR_Y,    TD(TD_COLN), FR_EQL,
     KC_LSFT,  MT(MOD_LCTL, FR_A),   MT(MOD_LALT, KC_R),MT(MOD_RALT, KC_S),MT(MOD_LSFT, KC_T),KC_G,                       FR_M,    MT(MOD_RSFT, KC_N),MT(MOD_RALT, KC_E),MT(MOD_LALT, KC_I),    MT(MOD_RCTL, FR_U), KC_QUOT,
     KC_LCTL,   FR_Z,   FR_X,    FR_C,    FR_V,    FR_D,    KC_BTN1,           KC_BTN2,  FR_K,    FR_H,    TD(TD_COMM), TD(TD_DOT),  FR_EXLM, KC_CAPS,
-                KC_LEFT, KC_RIGHT, TD(TD_LOCK),  KC_SPC,  KC_BSPC,                    TT(1),    KC_ENT,   TT(2),  KC_UP, KC_DOWN
+                KC_LEFT, KC_RIGHT, KC_LCMD,  KC_SPC,  KC_BSPC,                    TT(1),    KC_ENT,   TT(2),  KC_UP, KC_DOWN
     ),
 
 [1] = LAYOUT(
@@ -165,10 +165,11 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 
 #if defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
-    [0] = { ENCODER_CCW_CW(KC_MS_UP, KC_MS_DOWN), ENCODER_CCW_CW(KC_MS_LEFT, KC_MS_RIGHT) },
-    [1] = { ENCODER_CCW_CW(KC_MS_UP, KC_MS_DOWN), ENCODER_CCW_CW(KC_MS_LEFT, KC_MS_RIGHT) },
+    [0] = { ENCODER_CCW_CW(KC_KB_VOLUME_UP, KC_KB_VOLUME_DOWN), ENCODER_CCW_CW(KC_BRIGHTNESS_UP, KC_BRIGHTNESS_DOWN)},
+    [1] = { ENCODER_CCW_CW(KC_MS_UP, KC_MS_DOWN), ENCODER_CCW_CW(KC_MS_RIGHT, KC_MS_LEFT) },
     [2] = { ENCODER_CCW_CW(KC_KB_VOLUME_UP, KC_KB_VOLUME_DOWN), ENCODER_CCW_CW(KC_BRIGHTNESS_UP, KC_BRIGHTNESS_DOWN)},
-    [3] = { ENCODER_CCW_CW(KC_MS_UP, KC_MS_DOWN), ENCODER_CCW_CW(KC_MS_LEFT, KC_MS_RIGHT) },
+    [3] = { ENCODER_CCW_CW(KC_KB_VOLUME_UP, KC_KB_VOLUME_DOWN), ENCODER_CCW_CW(KC_BRIGHTNESS_UP, KC_BRIGHTNESS_DOWN)},
+
 };
 #endif
 
@@ -211,13 +212,13 @@ layer_state_t layer_state_set_user(layer_state_t state) {
     return state;
 }
 
-const uint16_t PROGMEM pt_combo[] = {KC_P, MT(MOD_LSFT, KC_T), COMBO_END};
 const uint16_t PROGMEM ft_combo[] = {KC_F, MT(MOD_LSFT, KC_T), COMBO_END};
 const uint16_t PROGMEM sp_combo[] = {KC_P, MT(MOD_RALT, KC_S), COMBO_END};
 const uint16_t PROGMEM arst_combo[] = {MT(MOD_LCTL, FR_A), MT(MOD_LALT, KC_R), MT(MOD_RALT, KC_S), MT(MOD_LSFT, KC_T), COMBO_END};
+const uint16_t PROGMEM rst_combo[] = {MT(MOD_LALT, KC_R), MT(MOD_RALT, KC_S), MT(MOD_LSFT, KC_T), COMBO_END};
 combo_t key_combos[] = {
-    COMBO(pt_combo, KC_ENT),
     COMBO(ft_combo, KC_DEL),
     COMBO(sp_combo, KC_BSPC),
-    COMBO(arst_combo, KC_SPC)
+    COMBO(arst_combo, KC_SPC),
+    COMBO(rst_combo, KC_ENT),
 };
